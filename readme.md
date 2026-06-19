@@ -33,6 +33,16 @@ An aesthetic, high-performance, real-time Sentiment Analysis web application. Th
 - **Serialization & Storage:** `Joblib`
 
 ---
+sentiment-pulse-detector/
+│
+├── app.py                      # Unified FastAPI backend & HTML root router
+├── best_sentiment_model.pkl    # Serialized Random Forest Classifier
+├── tfidf_vectorizer.pkl        # Serialized TF-IDF feature vocabulary
+├── README.md                   # Project documentation and guide
+│
+└── images/                     # Folder containing screenshot assets for documentation
+    ├── app_screenshot.png
+    └── confidence_chart.png
 
 ## 📊 Pipeline Data Flow
 The system strictly isolates runtime data transformation from your historical training datasets to prevent production data drift failures, following this assembly line:
