@@ -1,0 +1,8 @@
+/myenv
+*.ipynb
+*.pkl
+__pycache__
+Logistic Regression
+Random Forest
+*.csv
+*.in

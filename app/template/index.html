@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Pulse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center text-slate-100 p-4">
+
+    <div class="w-full max-w-xl glass-card rounded-2xl p-8 shadow-2xl transition-all duration-300">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                Sentiment Pulse Detector
+            </h1>
+            <p class="text-sm text-slate-400 mt-2">Enter text below to extract real-time emotional polarity</p>
+        </div>
+
+        <div class="space-y-4">
+            <textarea id="userInput" rows="4" 
+                class="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition resize-none"
+                placeholder="Type something here (e.g., 'Apple pay is so smooth, absolutely incredible service!')..."></textarea>
+            
+            <button id="analyzeBtn" onclick="analyzeSentiment()"
+                class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-xl transition duration-200 transform active:scale-[0.99] shadow-lg shadow-indigo-500/20">
+                Analyze Sentiment
+            </button>
+        </div>
+
+        <div id="loading" class="hidden flex justify-center items-center mt-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-400"></div>
+        </div>
+
+        <div id="resultContainer" class="hidden mt-8 p-5 rounded-xl border border-dashed transition-all duration-300">
+            <div class="flex justify-between items-center">
+                <div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1">Detected Sentiment</span>
+                    <h2 id="sentimentOutput" class="text-2xl font-bold tracking-wide"></h2>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1">Confidence</span>
+                    <span id="confidenceOutput" class="text-xl font-bold text-slate-200"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function analyzeSentiment() {
+            const textInput = document.getElementById('userInput').value;
+            const btn = document.getElementById('analyzeBtn');
+            const loading = document.getElementById('loading');
+            const resultContainer = document.getElementById('resultContainer');
+            const sentimentOutput = document.getElementById('sentimentOutput');
+            const confidenceOutput = document.getElementById('confidenceOutput');
+
+            if (!textInput.trim()) {
+                alert("Please drop some text inside the box before analyzing!");
+                return;
+            }
+
+            // UI State Toggle: Loading
+            loading.classList.remove('hidden');
+            resultContainer.classList.add('hidden');
+            btn.disabled = true;
+
+            try {
+                // Send the network request directly to your running FastAPI instance
+                const response = await fetch('/api/predict/result', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: textInput })
+                });
+
+                if (!response.ok) throw new Error('API server error occurred');
+                const data = await response.json();
+
+
+                // Dynamic UI updates based on the text string value from map dictionary
+                resultContainer.className = "mt-8 p-5 rounded-xl border transition-all duration-300 ";
+                
+                if (data.result === "POSITIVE") {
+                    resultContainer.classList.add('bg-emerald-950/20', 'border-emerald-500/30');
+                    sentimentOutput.className = "text-2xl font-bold tracking-wide text-emerald-400";
+                    sentimentOutput.innerText = "🟢 POSITIVE";
+                } else if (data.result === "NEUTRAL") {
+                    resultContainer.classList.add('bg-amber-950/20', 'border-amber-500/30');
+                    sentimentOutput.className = "text-2xl font-bold tracking-wide text-amber-400";
+                    sentimentOutput.innerText = "🟡 NEUTRAL";
+                } else {
+                    resultContainer.classList.add('bg-rose-950/20', 'border-rose-500/30');
+                    sentimentOutput.className = "text-2xl font-bold tracking-wide text-rose-400";
+                    sentimentOutput.innerText = "🔴 NEGATIVE";
+                }
+
+                const confidenceValue = data.confidence_scores ? Object.values(data.confidence_scores).map(v => `${(v*100).toFixed(1)}%`).join(' / ') : '';
+                confidenceOutput.innerText = confidenceValue;
+                resultContainer.classList.remove('hidden');
+
+            } catch (error) {
+                console.error(error);
+                alert("Could not connect to FastAPI backend. Ensure it is running on http://127.0.0.1:8000");
+            } finally {
+                loading.classList.add('hidden');
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
