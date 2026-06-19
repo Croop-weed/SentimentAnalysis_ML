@@ -1,12 +1,3 @@
-/myenv
-*.ipynb
-*.pkl
-__pycache__
-Logistic Regression
-Random Forest
-*.csv
-*.in
-
 # 📊 Sentiment Pulse Detector
 
 An aesthetic, high-performance, real-time Sentiment Analysis web application. This project features a machine learning pipeline powered by a **Random Forest Classifier** trained on text data vectorized via **TF-IDF (Term Frequency-Inverse Document Frequency)**. The entire system is packaged as a unified **FastAPI** service that serves both a modern Tailwind CSS glassmorphic frontend and a high-speed prediction engine from a single port.
